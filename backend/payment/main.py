@@ -1,12 +1,13 @@
 import os
+from time import sleep
 from enum import Enum
-from typing import Any
 
 import httpx
 from pydantic import BaseModel
 from redis_om import get_redis_connection, HashModel
-from fastapi import FastAPI, HTTPException, status, Response, Request
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.background import BackgroundTasks
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -53,18 +54,56 @@ class OrderRequest(BaseModel):
     quantity: int
 
 
+def order_completed(order: Order) -> None:
+    sleep(5)  # Payment confirmation or not.
+    order.status = OrderStatus.COMPLETED
+    order.save()
+
+    # Send event order through RedisStreams to update product
+    # without sending it through REST API.
+    redis.xadd("order_completed", order.dict(), "*")
+
+
+@app.get(
+    "/api/orders",
+    summary="Get all orders",
+    tags=["Orders"],
+)
+async def get_orders():
+    return [Order.get(order_pk) for order_pk in Order.all_pks()]
+
+
+@app.get(
+    "/api/orders/{order_pk}",
+    summary="Get an order based on his pk",
+    tags=["Orders"],
+)
+async def get_order(order_pk: str):
+    try:
+        return Order.get(order_pk)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Order with pk {order_pk} was not found",
+        )
+
+
 @app.post(
     "/api/orders",
     summary="Create an order",
     tags=["Orders"],
     status_code=status.HTTP_201_CREATED,
 )
-async def create_order(order: OrderRequest):
+async def create_order(
+    background_tasks: BackgroundTasks,
+    order: OrderRequest
+):
     async with httpx.AsyncClient() as client:
         try:
             r = await client.get(
                 f"{os.getenv('INVENTORY_API_URL')}/api/products/{order.product_id}"
             )
+            r.raise_for_status()
         except httpx.HTTPError as err:
             raise HTTPException(
                 status_code=err.response.status_code,
@@ -81,5 +120,7 @@ async def create_order(order: OrderRequest):
         status=OrderStatus.PENDING,
     )
     order.save()
+
+    background_tasks.add_task(order_completed, order)
 
     return order
