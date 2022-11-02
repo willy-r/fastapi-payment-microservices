@@ -59,13 +59,13 @@ async def get_products():
     summary="Get a product based on his pk",
     tags=["Products"],
 )
-async def get_product(pk: str):
+async def get_product(product_pk: str):
     try:
-        return Product.get(pk)
+        return Product.get(product_pk)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product with pk {pk} was not found",
+            detail=f"Product with pk {product_pk} was not found",
         )
 
 
@@ -73,6 +73,7 @@ async def get_product(pk: str):
     "/api/products",
     summary="Creates a new product",
     tags=["Products"],
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_product(product: Product):
     return product.save()
@@ -85,11 +86,11 @@ async def create_product(product: Product):
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
 )
-async def delete_product(pk: str):
-    deleted = Product.delete(pk)
+async def delete_product(product_pk: str):
+    deleted = Product.delete(product_pk)
     
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product with pk {pk} was not found",
+            detail=f"Product with pk {product_pk} was not found",
         )

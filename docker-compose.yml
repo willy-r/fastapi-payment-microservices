@@ -1,19 +1,29 @@
 version: '3.9'
 
 services:
-  redis:
+  redis_inventory:
     image: redis:latest
     command: redis-server --save 60 1 --loglevel warning --requirepass admin
     restart: always
     ports:
       - 6380:6379
     volumes:
-      - database:/data
-    
+      - database_inventory:/data
+  
+  redis_payment:
+    image: redis:latest
+    command: redis-server --save 60 1 --loglevel warning --requirepass admin
+    restart: always
+    ports:
+      - 6381:6379
+    volumes:
+      - database_payment:/data
+
 
 networks:
   app_network:
 
 
 volumes:
-  database:
+  database_inventory:
+  database_payment:
