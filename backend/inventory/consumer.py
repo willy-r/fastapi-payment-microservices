@@ -1,6 +1,7 @@
 from time import sleep
 
 from main import redis, Product
+from exceptions import ProductNotAvailableException
 
 key = "order_completed"
 group = "inventory_group"
@@ -21,10 +22,24 @@ def consume(group: str, key: str, interval_sec: int = 1) -> None:
             if results:
                 for result in results:
                     order_dict = result[1][0][1]
-                    product = Product.get(order_dict["product_id"])
-                    print(product)
-                    product.quantity_available = product.quantity_available - int(order_dict["quantity"])
-                    product.save()
+
+                    try:
+                        product = Product.get(order_dict["product_id"])
+
+                        if product.quantity_available <= 0 or product.quantity_available < int(order_dict["quantity"]):
+                            raise ProductNotAvailableException()
+
+                        product.quantity_available = product.quantity_available - int(order_dict["quantity"])
+                        product.save()
+                        print(f"Payment approved, updating product to: {product}")
+                    except ProductNotAvailableException:
+                        order_dict["reason"] = "Product is not available"
+                        redis.xadd("refund_order", order_dict, "*")
+                        print(f"Refunding client payment because product is not available...")
+                    except Exception:
+                        order_dict["reason"] = "Product was not found"
+                        redis.xadd("refund_order", order_dict, "*")
+                        print(f"Refunding client payment because product was not found...")
         except Exception as err:
             print(str(err))
         sleep(interval_sec)

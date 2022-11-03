@@ -43,6 +43,7 @@ class Order(HashModel):
     total: float
     quantity: int
     status: OrderStatus
+    reason: str | None = None
 
     class Meta:
         database = redis

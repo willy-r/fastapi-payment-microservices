@@ -1,0 +1,2 @@
+class ProductNotAvailableException(Exception):
+    pass
