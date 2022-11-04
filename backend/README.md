@@ -11,4 +11,4 @@
 ## Inventory service
 
 - Store products
-- Store quantities of those products
+- Store quantities of these products
