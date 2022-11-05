@@ -26,6 +26,11 @@ export default function Wrapper({ children }: Props) {
                     Products
                   </Link>
                 </li>
+                <li className="nav-item">
+                  <Link className="nav-link active" aria-current="page" to="/checkout-product">
+                    Checkout
+                  </Link>
+                </li>
               </ul>
             </div>
           </nav>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import Wrapper from "./Wrapper";
 
 type Product = {
@@ -70,11 +69,14 @@ export default function Products() {
                   <td>{product.price}</td>
                   <td>{product.quantity_available}</td>
                   <td>
-                    <a href="#" role="button" className="btn btn-sm btn-outline-secondary"
-                      onClick={(event) => deleteProduct(product.id)}
+                    <a href="#" role="button" className="btn btn-sm btn-outline-secondary me-1"
+                      onClick={(_) => deleteProduct(product.id)}
                     >
                       Delete
                     </a>
+                    <Link to="/checkout-product" role="button" className="btn btn-sm btn-outline-primary">
+                      Buy
+                    </Link>
                   </td>
                 </tr>
               );
