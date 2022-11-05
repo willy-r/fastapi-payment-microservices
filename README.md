@@ -20,7 +20,7 @@ Simple payment app built with FastAPI following the microservices architecture. 
 > Inventory front-end
 ![Inventory front-end](./docs/inventory_frontend.png)
 
-> Inventory front-end
+> Payment front-end
 ![Payment front-end](./docs/payment_frontend.png)
 
 
