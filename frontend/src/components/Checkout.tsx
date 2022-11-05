@@ -12,6 +12,9 @@ export default function Checkout() {
       try {
         if (id) {
           const r = await fetch(`${import.meta.env.VITE_INVENTORY_API_URL}/api/products/${id}`);
+          if (!r.ok) {
+            throw new Error();
+          }
           const data = await r.json();
           const realPrice = (parseFloat(data.price) * 1.2).toFixed(2)
           setMessage(`Your product price is $${realPrice}`);
