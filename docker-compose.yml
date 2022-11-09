@@ -8,7 +8,7 @@ services:
     ports:
       - 6380:6379
     volumes:
-      - database_inventory:/data
+      - database:/data
 
 
 networks:
@@ -16,5 +16,4 @@ networks:
 
 
 volumes:
-  database_inventory:
-  database_payment:
+  database:
